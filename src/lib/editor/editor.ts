@@ -10,6 +10,7 @@ export function createEditor(
   initialContent = '',
   onContentChange?: ContentCallback,
   dark = true,
+  cursorPos?: number,
 ): EditorView {
   const theme = EditorView.theme(
     {
@@ -18,38 +19,23 @@ export function createEditor(
         color: dark ? '#e5e5e5' : '#1a1a1a',
         height: '100%',
         fontSize: '14px',
-        fontFamily:
-          "'JetBrains Mono', 'Fira Code', ui-monospace, monospace",
+        fontFamily: "'JetBrains Mono', 'Fira Code', ui-monospace, monospace",
       },
-      '&.cm-editor': {
-        outline: 'none',
-      },
+      '&.cm-editor': { outline: 'none' },
       '.cm-scroller': {
-        fontFamily:
-          "'JetBrains Mono', 'Fira Code', ui-monospace, monospace",
+        fontFamily: "'JetBrains Mono', 'Fira Code', ui-monospace, monospace",
         lineHeight: '1.7',
       },
-      '.cm-content': {
-        caretColor: '#3b82f6',
-        padding: '0',
-      },
-      '.cm-cursor': {
-        borderLeftColor: '#3b82f6',
-      },
+      '.cm-content': { caretColor: '#3b82f6', padding: '0' },
+      '.cm-cursor': { borderLeftColor: '#3b82f6' },
       '.cm-selectionBackground': {
         backgroundColor: dark
           ? 'rgba(59, 130, 246, 0.25)'
           : 'rgba(59, 130, 246, 0.15) !important',
       },
-      '.cm-gutters': {
-        display: 'none',
-      },
-      '.cm-activeLine': {
-        backgroundColor: 'transparent',
-      },
-      '.cm-foldPlaceholder': {
-        display: 'none',
-      },
+      '.cm-gutters': { display: 'none' },
+      '.cm-activeLine': { backgroundColor: 'transparent' },
+      '.cm-foldPlaceholder': { display: 'none' },
     },
     { dark },
   )
@@ -70,8 +56,11 @@ export function createEditor(
     ],
   })
 
-  return new EditorView({
-    state,
-    parent,
-  })
+  const view = new EditorView({ state, parent })
+
+  if (cursorPos !== undefined) {
+    view.dispatch({ selection: { anchor: cursorPos } })
+  }
+
+  return view
 }

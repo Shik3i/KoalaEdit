@@ -5,7 +5,14 @@
   import Sidebar from './components/Sidebar.svelte'
   import { getNotes, saveNote, deleteNote, createNote, type Note } from './lib/store/storage'
 
-  let theme = $state<'light' | 'dark'>('dark')
+  let theme = $state<'light' | 'dark'>(
+    (typeof localStorage !== 'undefined' && localStorage.getItem('koala-theme') as 'light' | 'dark') || 'dark'
+  )
+
+  $effect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    if (typeof localStorage !== 'undefined') localStorage.setItem('koala-theme', theme)
+  })
   let notes = $state<Note[]>([])
   let activeNoteId = $state<string | null>(null)
   let content = $state('')

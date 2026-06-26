@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEditor, type ContentCallback } from '../lib/editor/editor'
-  import { onMount, onDestroy } from 'svelte'
+  import { onMount } from 'svelte'
 
   let { content = $bindable(''), dark = true }: { content?: string; dark?: boolean } = $props()
 
@@ -11,19 +11,26 @@
     content = val
   }
 
+  // Create editor once on mount
   $effect(() => {
-    if (!container) return
-    view?.destroy()
+    if (!container || view) return
     view = createEditor(container, content, handleChange, dark)
 
-    return () => view?.destroy()
+    return () => {
+      view?.destroy()
+      view = undefined
+    }
   })
 
-  // Re-theme on dark change without destroying
+  // Re-theme when dark mode changes (recreate editor)
+  let prevDark = $state(dark)
   $effect(() => {
     if (!view) return
-    // Update theme via CSS variable
-    container.style.setProperty('--cm-color', dark ? '#e5e5e5' : '#1a1a1a')
+    if (dark === prevDark) return
+    prevDark = dark
+    const pos = view.state.selection.main.head
+    view.destroy()
+    view = createEditor(container, content, handleChange, dark, pos)
   })
 </script>
 
