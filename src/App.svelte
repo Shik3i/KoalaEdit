@@ -1,10 +1,74 @@
 <script lang="ts">
-  import { Moon, Sun, MarkdownLogo, Files } from 'phosphor-svelte'
+  import { Moon, Sun, MarkdownLogo } from 'phosphor-svelte'
   import Editor from './components/Editor.svelte'
   import Preview from './components/Preview.svelte'
+  import Sidebar from './components/Sidebar.svelte'
+  import { getNotes, saveNote, deleteNote, createNote, type Note } from './lib/store/storage'
 
   let theme = $state<'light' | 'dark'>('dark')
-  let content = $state('# Hello KoalaEdit\n\nStart writing markdown...')
+  let notes = $state<Note[]>([])
+  let activeNoteId = $state<string | null>(null)
+  let content = $state('')
+  let loaded = $state(false)
+  let saveTimer: ReturnType<typeof setTimeout> | null = null
+
+  $effect(() => {
+    if (loaded) return
+    getNotes().then((n) => {
+      notes = n
+      loaded = true
+      if (n.length > 0) {
+        selectNote(n[0].id)
+      } else {
+        handleNew()
+      }
+    })
+  })
+
+  async function selectNote(id: string) {
+    activeNoteId = id
+    const note = notes.find((n) => n.id === id)
+    if (note) content = note.content
+  }
+
+  function handleNew() {
+    const note = createNote()
+    notes = [note, ...notes]
+    activeNoteId = note.id
+    content = note.content
+  }
+
+  async function handleDelete(id: string) {
+    await deleteNote(id)
+    notes = notes.filter((n) => n.id !== id)
+    if (activeNoteId === id) {
+      if (notes.length > 0) {
+        selectNote(notes[0].id)
+      } else {
+        handleNew()
+      }
+    }
+  }
+
+  // Auto-save on content change
+  $effect(() => {
+    content // track this dependency
+    if (!loaded || !activeNoteId) return
+    if (saveTimer) clearTimeout(saveTimer)
+    saveTimer = setTimeout(saveCurrentNote, 500)
+  })
+
+  async function saveCurrentNote() {
+    if (!activeNoteId) return
+    const idx = notes.findIndex((n) => n.id === activeNoteId)
+    if (idx === -1) return
+    const note = notes[idx]
+    const updated = { ...note, content, updatedAt: Date.now() }
+    const firstLine = content.split('\n')[0].replace(/^#\s*/, '').trim()
+    updated.title = firstLine || 'Untitled'
+    notes = notes.map((n) => (n.id === activeNoteId ? updated : n))
+    await saveNote(updated)
+  }
 
   function toggleTheme() {
     theme = theme === 'light' ? 'dark' : 'light'
@@ -30,14 +94,17 @@
 
   <main class="workspace">
     <aside class="sidebar">
-      <div class="sidebar-header">
-        <Files size={14} />
-        <span>Files</span>
-      </div>
+      <Sidebar
+        {notes}
+        activeId={activeNoteId ?? ''}
+        onSelect={selectNote}
+        onNew={handleNew}
+        onDelete={handleDelete}
+      />
     </aside>
 
     <section class="editor-pane">
-      <Editor bind:content={content} dark={theme === 'dark'} />
+      <Editor bind:content dark={theme === 'dark'} />
     </section>
 
     <section class="preview-pane">
@@ -109,18 +176,6 @@
     overflow-y: auto;
   }
 
-  .sidebar-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--color-text-muted);
-    padding: 4px 4px 12px;
-  }
-
   .editor-pane,
   .preview-pane {
     padding: 16px;
@@ -131,5 +186,4 @@
     border-left: 1px solid var(--color-border);
     background: var(--color-surface-alt);
   }
-
 </style>
