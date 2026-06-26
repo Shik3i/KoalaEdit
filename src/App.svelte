@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Moon, Sun, MarkdownLogo, Files } from 'phosphor-svelte'
   import Editor from './components/Editor.svelte'
+  import Preview from './components/Preview.svelte'
 
   let theme = $state<'light' | 'dark'>('dark')
   let content = $state('# Hello KoalaEdit\n\nStart writing markdown...')
@@ -40,7 +41,7 @@
     </section>
 
     <section class="preview-pane">
-      <p class="placeholder">Preview</p>
+      <Preview {content} dark={theme === 'dark'} />
     </section>
   </main>
 </div>
@@ -131,9 +132,4 @@
     background: var(--color-surface-alt);
   }
 
-  .placeholder {
-    color: var(--color-text-muted);
-    font-size: 13px;
-    font-family: var(--font-mono);
-  }
 </style>
