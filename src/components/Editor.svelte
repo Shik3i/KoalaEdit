@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEditor, type ContentCallback } from '../lib/editor/editor'
-  import { onMount } from 'svelte'
 
   let { content = $bindable(''), dark = true }: { content?: string; dark?: boolean } = $props()
 

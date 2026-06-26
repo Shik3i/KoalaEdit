@@ -5,6 +5,15 @@ import remarkRehype from 'remark-rehype'
 import rehypeStringify from 'rehype-stringify'
 import rehypeShiki from '@shikijs/rehype'
 import { createHighlighter, type Highlighter } from 'shiki/bundle/web'
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
+
+const schema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    '*': [...(defaultSchema.attributes?.['*'] ?? []), 'style'],
+  },
+}
 
 let highlighter: Highlighter | null = null
 
@@ -22,8 +31,10 @@ async function getHighlighter(): Promise<Highlighter> {
   return highlighter
 }
 
-let pipelineLight: ReturnType<typeof unified> | null = null
-let pipelineDark: ReturnType<typeof unified> | null = null
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let pipelineLight: any = null
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let pipelineDark: any = null
 
 async function getPipeline(theme: 'min-light' | 'min-dark') {
   const h = await getHighlighter()
@@ -32,17 +43,19 @@ async function getPipeline(theme: 'min-light' | 'min-dark') {
     pipelineLight = unified()
       .use(remarkParse)
       .use(remarkGfm)
-      .use(remarkRehype, { allowDangerousHtml: true })
+      .use(remarkRehype)
       .use(rehypeShiki, { highlighter: h, theme })
-      .use(rehypeStringify, { allowDangerousHtml: true })
+      .use(rehypeSanitize, schema)
+      .use(rehypeStringify)
   }
   if (key === 'dark' && !pipelineDark) {
     pipelineDark = unified()
       .use(remarkParse)
       .use(remarkGfm)
-      .use(remarkRehype, { allowDangerousHtml: true })
+      .use(remarkRehype)
       .use(rehypeShiki, { highlighter: h, theme })
-      .use(rehypeStringify, { allowDangerousHtml: true })
+      .use(rehypeSanitize, schema)
+      .use(rehypeStringify)
   }
   return key === 'light' ? pipelineLight! : pipelineDark!
 }

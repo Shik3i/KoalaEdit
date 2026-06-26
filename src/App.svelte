@@ -59,7 +59,7 @@
 
   // Auto-save on content change
   $effect(() => {
-    content // track this dependency
+    void content // track this dependency
     if (!loaded || !activeNoteId) return
     if (saveTimer) clearTimeout(saveTimer)
     saveTimer = setTimeout(saveCurrentNote, 500)

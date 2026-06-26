@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte'
   import { renderMarkdown } from '../lib/markdown/render'
 
   let { content = '', dark = true }: { content?: string; dark?: boolean } = $props()
@@ -11,14 +10,14 @@
     loading = true
     try {
       html = await renderMarkdown(content, dark)
-    } catch (e) {
+    } catch {
       html = '<p style="color:var(--color-danger)">Render error</p>'
     }
     loading = false
   }
 
   $effect(() => {
-    content; dark  // track deps
+    void content; void dark  // track deps
     update()
   })
 </script>

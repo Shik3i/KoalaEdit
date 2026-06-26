@@ -42,7 +42,6 @@
 
   <div class="note-list">
     {#each notes as note (note.id)}
-      <!-- svelte-ignore a11y_no_static_element_interactions -->
       <div
         class="note-item"
         class:active={note.id === activeId}
