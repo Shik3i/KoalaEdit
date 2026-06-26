@@ -1,7 +1,9 @@
 <script lang="ts">
   import { Moon, Sun, MarkdownLogo, Files } from 'phosphor-svelte'
+  import Editor from './components/Editor.svelte'
 
   let theme = $state<'light' | 'dark'>('dark')
+  let content = $state('# Hello KoalaEdit\n\nStart writing markdown...')
 
   function toggleTheme() {
     theme = theme === 'light' ? 'dark' : 'light'
@@ -34,7 +36,7 @@
     </aside>
 
     <section class="editor-pane">
-      <p class="placeholder">Editor</p>
+      <Editor bind:content={content} dark={theme === 'dark'} />
     </section>
 
     <section class="preview-pane">
