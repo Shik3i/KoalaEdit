@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { Moon, Sun, MarkdownLogo, Files } from 'phosphor-svelte'
+
   let theme = $state<'light' | 'dark'>('dark')
 
   function toggleTheme() {
@@ -8,15 +10,27 @@
 
 <div class="app" data-theme={theme}>
   <header class="toolbar">
-    <h1 class="title">KoalaEdit</h1>
-    <button class="icon-btn" onclick={toggleTheme} aria-label="Toggle theme">
-      {theme === 'light' ? '🌙' : '☀️'}
-    </button>
+    <div class="toolbar-left">
+      <MarkdownLogo size={18} weight="fill" color="var(--color-accent)" />
+      <span class="title">KoalaEdit</span>
+    </div>
+    <div class="toolbar-right">
+      <button class="icon-btn" onclick={toggleTheme} aria-label="Toggle theme">
+        {#if theme === 'light'}
+          <Sun size={16} />
+        {:else}
+          <Moon size={16} />
+        {/if}
+      </button>
+    </div>
   </header>
 
   <main class="workspace">
     <aside class="sidebar">
-      <p class="placeholder">Files</p>
+      <div class="sidebar-header">
+        <Files size={14} />
+        <span>Files</span>
+      </div>
     </aside>
 
     <section class="editor-pane">
@@ -46,6 +60,14 @@
     padding: 0 12px;
     border-bottom: 1px solid var(--color-border);
     flex-shrink: 0;
+    gap: 8px;
+  }
+
+  .toolbar-left,
+  .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .title {
@@ -63,12 +85,12 @@
     border: none;
     border-radius: 4px;
     background: transparent;
-    color: var(--color-text);
+    color: var(--color-text-secondary);
     cursor: pointer;
-    font-size: 16px;
   }
   .icon-btn:hover {
     background: var(--color-surface-hover);
+    color: var(--color-text);
   }
 
   .workspace {
@@ -82,6 +104,18 @@
     border-right: 1px solid var(--color-border);
     padding: 8px;
     overflow-y: auto;
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+    padding: 4px 4px 12px;
   }
 
   .editor-pane,
@@ -98,5 +132,6 @@
   .placeholder {
     color: var(--color-text-muted);
     font-size: 13px;
+    font-family: var(--font-mono);
   }
 </style>
