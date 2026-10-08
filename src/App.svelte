@@ -25,7 +25,7 @@
       notes = n
       loaded = true
       if (n.length > 0) {
-        selectNote(n[0].id)
+        selectNote(n[0]!.id)
       } else {
         handleNew()
       }
@@ -50,7 +50,7 @@
     notes = notes.filter((n) => n.id !== id)
     if (activeNoteId === id) {
       if (notes.length > 0) {
-        selectNote(notes[0].id)
+        selectNote(notes[0]!.id)
       } else {
         handleNew()
       }
@@ -69,9 +69,9 @@
     if (!activeNoteId) return
     const idx = notes.findIndex((n) => n.id === activeNoteId)
     if (idx === -1) return
-    const note = notes[idx]
+    const note = notes[idx]!
     const updated = { ...note, content, updatedAt: Date.now() }
-    const firstLine = content.split('\n')[0].replace(/^#\s*/, '').trim()
+    const firstLine = content.split('\n')[0]!.replace(/^#\s*/, '').trim()
     updated.title = firstLine || 'Untitled'
     notes = notes.map((n) => (n.id === activeNoteId ? updated : n))
     await saveNote(updated)
